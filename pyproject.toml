@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "midas"
+version = "0.1.0"
+description = "A cryptocurrency options trading framework"
+authors = ["Phú <phu.hn.vo@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+
+aiohttp = "^3.7"
+
+[tool.poetry.dev-dependencies]
+pytest = "^6.2"
+
+pandas = "^1.2.4"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
