@@ -2,7 +2,8 @@ from __future__ import annotations
 from typing import Any
 
 from aiohttp_rpc import WsJsonRpcClient
-from midas.base.feed import DataFeed
+from midas.base.feed import DataFeed, OnMessage, Option
+from midas.helpers.datetime import from_ms
 
 
 class DeribitFeed(DataFeed):
@@ -19,15 +20,27 @@ class DeribitFeed(DataFeed):
 
 
     async def get_options(self, currency: str, expired: bool = False):
-        options = await self._ws.call(
+        raw_options = await self._ws.call(
             'public/get_instruments', currency=currency, expired=expired, kind='option',
         )
-        return options
+        all_options = [create_option(item) for item in raw_options]
+        return sorted(all_options, key=lambda option: (option.expiration, option.strike))
 
 
-    async def subscribe(self, channels: list[str]):
-        pass
+    async def subscribe(self, channels: list[str], on_message: OnMessage):
+        self._on_message = on_message
+        await self._ws.call('public/subscribe', channels=channels)
 
 
     async def _on_request(self, json_request: dict[str, Any], **kwargs: list[Any]):
-        pass
+        self._on_message(json_request)
+
+
+def create_option(item: dict[str, Any]):
+    return Option(
+        name      =item['instrument_name'],
+        creation  =from_ms(item['creation_timestamp']),
+        expiration=from_ms(item['expiration_timestamp']),
+        strike    =int(item['strike']),
+        type      =item['option_type'],
+    )

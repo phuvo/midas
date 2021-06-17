@@ -2,7 +2,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Literal
+from typing import Any, Callable, Dict, Literal
 
 
 class DataFeed(ABC):
@@ -13,10 +13,11 @@ class DataFeed(ABC):
 
     @abstractmethod
     async def get_options(self, currency: str, expired: bool = False) -> list[Option]:
+        """Return all options, sorted by expirate date and strike price."""
         pass
 
     @abstractmethod
-    async def subscribe(self, channels: list[str]):
+    async def subscribe(self, channels: list[str], on_message: OnMessage):
         pass
 
 
@@ -25,5 +26,8 @@ class Option:
     name: str
     creation: datetime
     expiration: datetime
-    strike: float
+    strike: int
     type: Literal['call', 'put']
+
+
+OnMessage = Callable[[Dict[str, Any]], None]
