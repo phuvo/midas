@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Callable, Dict, Literal
+from .ticker import TickerDict
 
 
 class DataFeed(ABC):
@@ -18,6 +19,10 @@ class DataFeed(ABC):
 
     @abstractmethod
     async def subscribe(self, channels: list[str], on_message: OnMessage):
+        pass
+
+    @abstractmethod
+    async def get_ticker(self, instrument: str) -> TickerDict:
         pass
 
 

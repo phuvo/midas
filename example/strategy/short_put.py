@@ -1,6 +1,8 @@
+from __future__ import annotations
 from typing import Awaitable, Callable
 
-from midas.base.feed import DataFeed
+from midas.base.feed import DataFeed, Option
+from midas.base.ticker import create_ticker
 from midas.base.timer import Timer
 
 
@@ -19,12 +21,24 @@ class ShortPut:
 
     async def sell_otm_put(self):
         all_options = await self.feed.get_options(self.CURRENCY)
-        print(len(all_options))
-        self.run_after_expiration(self.sell_otm_put)
+        option_map = {option.name: option for option in all_options}
+
+        put_options = [option for option in all_options if option.type == 'put']
+        selected_ticker = await self.find_sellable_put(put_options)
+
+        assert(selected_ticker)
+
+        selected_option = option_map[selected_ticker.instrument]
+        self.run_after_expiration(self.sell_otm_put, selected_option)
 
 
-    def run_after_expiration(self, task: Callable[[], Awaitable[None]]):
-        """
-        Schedule a task to run after daily options' expiration time, at 08:05 UTC.
-        """
-        self.timer.schedule_task(15, task)
+    async def find_sellable_put(self, put_options: list[Option]):
+        for option in put_options:
+            ticker = await self.feed.get_ticker(option.name)
+            if ticker['best_bid_price']:
+                return create_ticker(ticker)
+
+
+    def run_after_expiration(self, task: Callable[[], Awaitable[None]], option: Option):
+        delta = option.expiration - self.timer.now()
+        self.timer.schedule_task(delta.total_seconds() + 60, task)

@@ -36,6 +36,10 @@ class DeribitFeed(DataFeed):
         self._on_message(json_request)
 
 
+    async def get_ticker(self, instrument: str):
+        return await self._ws.call('public/ticker', instrument_name=instrument)
+
+
 def create_option(item: dict[str, Any]):
     return Option(
         name      =item['instrument_name'],
