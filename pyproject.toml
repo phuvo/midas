@@ -16,6 +16,7 @@ cchardet = "^2.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2"
+pytest-asyncio = "^0.15"
 pandas = "^1.2"
 toml = "^0.10"
 
