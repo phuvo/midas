@@ -3,15 +3,10 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Callable, Dict, Literal
-from .ticker import TickerDict
+from .ticker import Ticker
 
 
 class DataFeed(ABC):
-    @staticmethod
-    @abstractmethod
-    async def create(config: Any) -> DataFeed:
-        pass
-
     @abstractmethod
     async def get_options(self, currency: str, expired: bool = False) -> list[Option]:
         """Return all options, sorted by expirate date and strike price."""
@@ -22,7 +17,7 @@ class DataFeed(ABC):
         pass
 
     @abstractmethod
-    async def get_ticker(self, instrument: str) -> TickerDict:
+    async def get_ticker(self, instrument: str) -> Ticker:
         pass
 
 

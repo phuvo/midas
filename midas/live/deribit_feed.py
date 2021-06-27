@@ -3,6 +3,7 @@ from typing import Any
 
 from aiohttp_rpc import WsJsonRpcClient
 from midas.base.feed import DataFeed, OnMessage, Option
+from midas.base.ticker import create_ticker
 from midas.helpers.datetime import from_ms
 
 
@@ -13,8 +14,8 @@ class DeribitFeed(DataFeed):
 
 
     @staticmethod
-    async def create(config: dict[str, str]):
-        feed = DeribitFeed(config['ws_url'])
+    async def create(ws_url: str):
+        feed = DeribitFeed(ws_url)
         await feed._ws.connect()
         return feed
 
@@ -37,7 +38,8 @@ class DeribitFeed(DataFeed):
 
 
     async def get_ticker(self, instrument: str):
-        return await self._ws.call('public/ticker', instrument_name=instrument)
+        ticker = await self._ws.call('public/ticker', instrument_name=instrument)
+        return create_ticker(ticker)
 
 
 def create_option(item: dict[str, Any]):
