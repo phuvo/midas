@@ -36,9 +36,9 @@ class ShortPut(Strategy):
     async def find_sellable_put(self, put_options: list[Option]):
         for option in put_options:
             ticker = await self.feed.get_ticker(option.name)
-            if ticker.bid_price: return ticker
+            if ticker.bid_price > 0: return ticker
 
 
     def run_after_expiration(self, task: Callable[[], Awaitable[None]], option: Option):
         delta = option.expiration - self.timer.now()
-        self.timer.schedule_task(delta.total_seconds() + 60, task)
+        self.timer.schedule_task(delta.total_seconds() + 900, task)
