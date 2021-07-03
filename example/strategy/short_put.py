@@ -1,18 +1,16 @@
 from __future__ import annotations
 from typing import Awaitable, Callable
-
-from midas.base.feed import DataFeed, Option
-from midas.base.strategy import Strategy
-from midas.base.timer import Timer
+from midas.base import Broker, DataFeed, Option, Strategy, Timer
 
 
 class ShortPut(Strategy):
     CURRENCY = 'BTC'
 
 
-    def __init__(self, feed: DataFeed, timer: Timer):
-        self.feed = feed
+    def __init__(self, timer: Timer, feed: DataFeed, broker: Broker):
         self.timer = timer
+        self.feed = feed
+        self.broker = broker
 
 
     async def on_start(self):

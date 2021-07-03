@@ -2,21 +2,27 @@ import asyncio
 from datetime import datetime
 from pathlib import Path
 
-from midas.base.timer import Timer
-from midas.paper import Chronos, CsvFeed
-from .strategy.short_put import ShortPut
+from midas.base import DataFeed, Timer
+from midas.paper import Chronos, CsvFeed, PaperBroker
+from .strategy import ShortPut
 
 
 def from_iso(iso: str):
     return datetime.fromisoformat(iso.replace('Z', '+00:00'))
 
 
-def create_strategy(timer: Timer):
+def create_feed(timer: Timer):
     data_path = Path(__file__).with_name('data')
     feed = CsvFeed(timer)
     feed.load_options([data_path / 'options.csv' ]) # type: ignore
     feed.load_tickers([data_path / '2021-W25.zip']) # type: ignore
-    return ShortPut(feed, timer)
+    return feed
+
+
+def create_broker(timer: Timer, feed: DataFeed):
+    broker = PaperBroker(timer, feed)
+    broker.add_cash('BTC', 0.02)
+    return broker
 
 
 async def backtest():
@@ -24,7 +30,9 @@ async def backtest():
     end   = from_iso('2021-06-27T08:10:00Z').timestamp()
 
     chronos = Chronos()
-    await chronos.add_strategy(create_strategy)
+    chronos.add_feed(create_feed)
+    chronos.add_broker(create_broker)
+    chronos.add_strategy(ShortPut)
     await chronos.run(start, end)
 
 

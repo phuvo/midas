@@ -1,8 +1,5 @@
 from typing import Callable
-
-from midas.base.strategy import Strategy
-from midas.base.timer import Timer
-
+from midas.base import Broker, DataFeed, Strategy, Timer
 from .simulated_timer import SimulatedTimer
 
 
@@ -13,8 +10,16 @@ class Chronos:
         self._timer = SimulatedTimer(lambda: self._current_time)
 
 
-    async def add_strategy(self, create_strategy: Callable[[Timer], Strategy]):
-        self._strategy = create_strategy(self._timer)
+    def add_feed(self, create_feed: Callable[[Timer], DataFeed]):
+        self._feed = create_feed(self._timer)
+
+
+    def add_broker(self, create_broker: Callable[[Timer, DataFeed], Broker]):
+        self._broker = create_broker(self._timer, self._feed)
+
+
+    def add_strategy(self, create_strategy: Callable[[Timer, DataFeed, Broker], Strategy]):
+        self._strategy = create_strategy(self._timer, self._feed, self._broker)
 
 
     async def run(self, start: float, end: float):
