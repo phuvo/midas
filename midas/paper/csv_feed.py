@@ -1,5 +1,6 @@
 from __future__ import annotations
 from datetime import timedelta
+from pathlib import Path
 from typing import Any
 
 import pandas
@@ -16,13 +17,13 @@ class CsvFeed(DataFeed):
         self._timer = timer
 
 
-    def load_options(self, csv_files: list[str]):
-        options_lists = [read_options(file_path) for file_path in csv_files]
+    def load_options(self, csv_files: list[str | Path]):
+        options_lists = [read_options(str(file_path)) for file_path in csv_files]
         self._options = sum(options_lists, [])
 
 
-    def load_tickers(self, csv_files: list[str]):
-        all_tickers = [read_tickers(file_path) for file_path in csv_files]
+    def load_tickers(self, csv_files: list[str | Path]):
+        all_tickers = [read_tickers(str(file_path)) for file_path in csv_files]
         instruments = pandas.concat(all_tickers).groupby('instrument')
 
         tickers: dict[str, DataFrame] = {}

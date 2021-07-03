@@ -7,20 +7,23 @@ from midas.paper import Chronos, CsvFeed, PaperBroker
 from .strategy import ShortPut
 
 
+data_path = Path(__file__).with_name('data')
+
+
 def from_iso(iso: str):
     return datetime.fromisoformat(iso.replace('Z', '+00:00'))
 
 
 def create_feed(timer: Timer):
-    data_path = Path(__file__).with_name('data')
     feed = CsvFeed(timer)
-    feed.load_options([data_path / 'options.csv' ]) # type: ignore
-    feed.load_tickers([data_path / '2021-W25.zip']) # type: ignore
+    feed.load_options([data_path / 'options.csv' ])
+    feed.load_tickers([data_path / '2021-W25.zip'])
     return feed
 
 
 def create_broker(timer: Timer, feed: DataFeed):
     broker = PaperBroker(timer, feed)
+    broker.load_delivery_prices([data_path / 'delivery_prices.csv'])
     broker.add_cash('BTC', 0.02)
     return broker
 
