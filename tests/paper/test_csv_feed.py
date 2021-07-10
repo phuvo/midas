@@ -1,8 +1,6 @@
 import pytest
 from datetime import datetime, timezone
-
-from midas.paper.csv_feed import CsvFeed
-from midas.paper.simulated_timer import SimulatedTimer
+from midas.paper import CsvFeed, SimulatedTimer
 
 
 def from_iso(iso: str):

@@ -4,6 +4,7 @@ from typing import Literal, Optional
 
 OrderType = Literal['limit', 'market']
 OrderState = Literal['open', 'filled', 'rejected', 'cancelled']
+OrderEffect = Literal['good_til_cancelled', 'immediate_or_cancel']
 
 
 @dataclass(frozen=True)
@@ -12,7 +13,7 @@ class Order:
     amount: float
     type: OrderType
     price: Optional[float]
-    time_in_force: Literal['immediate_or_cancel']
+    time_in_force: OrderEffect = 'good_til_cancelled'
 
 
 @dataclass(frozen=True)
