@@ -9,7 +9,7 @@ from midas.base import Broker, DataFeed, Position, Timer
 from midas.base.order import CloseOrder, Order, OrderTicket
 
 
-class PaperBroker(Broker):
+class CsvBroker(Broker):
     _positions: dict[str, PositionData]
 
 

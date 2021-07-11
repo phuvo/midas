@@ -3,7 +3,7 @@ from datetime import datetime
 
 from midas.base import Position
 from midas.base.order import Order
-from midas.paper import CsvFeed, PaperBroker, SimulatedTimer
+from midas.paper import CsvBroker, CsvFeed, SimulatedTimer
 
 
 def from_iso(iso: str):
@@ -21,7 +21,7 @@ async def test_sell_position():
     feed.load_options(['tests/data/options.csv'])
     feed.load_tickers(['tests/data/tickers.csv'])
 
-    broker = PaperBroker(timer, feed)
+    broker = CsvBroker(timer, feed)
     await broker.sell(Order(SYMBOL, 1, 'limit', 0.0095))
 
     current_time = from_iso('2021-03-28T23:35:00Z').timestamp()

@@ -3,7 +3,7 @@ from datetime import datetime
 from pathlib import Path
 
 from midas.base import DataFeed, Timer
-from midas.paper import Chronos, CsvFeed, PaperBroker
+from midas.paper import Chronos, CsvBroker, CsvFeed
 from .strategy import ShortPut
 
 
@@ -22,7 +22,7 @@ def create_feed(timer: Timer):
 
 
 def create_broker(timer: Timer, feed: DataFeed):
-    broker = PaperBroker(timer, feed)
+    broker = CsvBroker(timer, feed)
     broker.load_delivery_prices([data_path / 'delivery_prices.csv'])
     broker.add_cash('BTC', 0.02)
     return broker
