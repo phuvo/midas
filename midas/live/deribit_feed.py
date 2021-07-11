@@ -3,8 +3,8 @@ from typing import Any
 
 from aiohttp_rpc import WsJsonRpcClient
 from midas.base.feed import DataFeed, OnMessage, Option
-from midas.base.ticker import create_ticker
 from midas.helpers.datetime import from_ms
+from midas.types.ticker import create_ticker
 
 
 class DeribitFeed(DataFeed):

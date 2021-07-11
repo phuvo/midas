@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Literal
 
 from midas.base import Broker, DataFeed, Position, Timer
-from midas.base.order import CloseOrder, Order, OrderTicket
+from midas.types.order import CloseOrder, Order, OrderTicket
 
 
 class CsvBroker(Broker):

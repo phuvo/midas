@@ -7,9 +7,9 @@ import pandas
 from pandas import DataFrame
 
 from midas.base.feed import DataFeed, OnMessage, Option
-from midas.base.ticker import Ticker
 from midas.base.timer import Timer
 from midas.helpers.datetime import from_ms
+from midas.types.ticker import Ticker
 
 
 class CsvFeed(DataFeed):

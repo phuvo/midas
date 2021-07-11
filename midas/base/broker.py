@@ -2,7 +2,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
-from .order import CloseOrder, Order, OrderTicket
+from midas.types.order import CloseOrder, Order, OrderTicket
 
 
 class Broker(ABC):

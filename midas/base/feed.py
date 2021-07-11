@@ -3,7 +3,8 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Callable, Dict, Literal
-from .ticker import Ticker
+
+from midas.types.ticker import Ticker
 
 
 class DataFeed(ABC):
