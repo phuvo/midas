@@ -1,6 +1,8 @@
 from __future__ import annotations
 from typing import Awaitable, Callable
+
 from midas.base import Broker, DataFeed, Option, Strategy, Timer
+from midas.types.order import Order
 
 
 class ShortPut(Strategy):
@@ -22,12 +24,15 @@ class ShortPut(Strategy):
         option_map = {option.name: option for option in all_options}
 
         put_options = [option for option in all_options if option.type == 'put']
-        selected_ticker = await self.find_sellable_put(put_options)
+        ticker = await self.find_sellable_put(put_options)
 
-        assert selected_ticker
-        print(selected_ticker)
+        assert ticker
+        print(f'Sold {ticker.instrument} at {ticker.bid_price}')
 
-        selected_option = option_map[selected_ticker.instrument]
+        sell_order = Order(ticker.instrument, 1, 'limit', ticker.bid_price)
+        await self.broker.sell(sell_order)
+
+        selected_option = option_map[ticker.instrument]
         self.run_after_expiration(self.sell_otm_put, selected_option)
 
 

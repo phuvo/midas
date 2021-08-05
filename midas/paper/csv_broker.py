@@ -2,15 +2,18 @@ from __future__ import annotations
 from collections import defaultdict
 from csv import DictReader
 from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
 from typing import Literal
 
 from midas.base import Broker, DataFeed, Position, Timer
 from midas.types.order import CloseOrder, Order, OrderTicket
+from midas.types.transaction import TradeLog, Transaction
 
 
 class CsvBroker(Broker):
     _positions: dict[str, PositionData]
+    _transactions: list[Transaction]
 
 
     def __init__(self, timer: Timer, feed: DataFeed):
@@ -19,6 +22,7 @@ class CsvBroker(Broker):
 
         self._cash = defaultdict(float)
         self._positions = {}
+        self._transactions = []
 
 
     def add_cash(self, currency: str, amount: float):
@@ -61,6 +65,12 @@ class CsvBroker(Broker):
         return self._create_order(('sell', order))
 
 
+    async def get_transactions(self, currency: str, start: datetime, end: datetime):
+        def is_valid(item: Transaction):
+            return get_currency(item.instrument) == currency and start <= item.timestamp < end
+        return [item for item in self._transactions if is_valid(item)]
+
+
     def _create_order(self, form: tuple[OrderMethod, Order | CloseOrder]):
         self._execute_order(form[0], form[1])
         return OrderTicket('1', form[1].instrument, 'filled')
@@ -99,6 +109,16 @@ class CsvBroker(Broker):
 
         currency = get_currency(instrument)
         self._cash[currency] += net_change
+
+        log = TradeLog(
+            timestamp =self._timer.now(),
+            type      ='trade',
+            instrument=instrument,
+            amount    =abs(size),
+            price     =price,
+            net_change=net_change,
+        )
+        self._transactions.append(log)
 
 
 OrderMethod = Literal['buy', 'sell', 'close']
