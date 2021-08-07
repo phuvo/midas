@@ -6,12 +6,15 @@ from datetime import datetime
 from pathlib import Path
 from typing import Literal
 
-from midas.base import Broker, DataFeed, Position, Timer
+from midas.base import Broker, DataFeed, Option, Position, Timer
 from midas.types.order import CloseOrder, Order, OrderTicket
 from midas.types.transaction import TradeLog, Transaction
 
 
 class CsvBroker(Broker):
+    _interval = 60
+
+    _cash: dict[str, float]
     _positions: dict[str, PositionData]
     _transactions: list[Transaction]
 
@@ -23,6 +26,8 @@ class CsvBroker(Broker):
         self._cash = defaultdict(float)
         self._positions = {}
         self._transactions = []
+
+        self._timer.schedule_task(self._interval, self._run_worker)
 
 
     def add_cash(self, currency: str, amount: float):
@@ -119,6 +124,58 @@ class CsvBroker(Broker):
             net_change=net_change,
         )
         self._transactions.append(log)
+
+
+    async def _run_worker(self):
+        await self._check_positions()
+        self._timer.schedule_task(self._interval, self._run_worker)
+
+
+    async def _check_positions(self):
+        expired_lists = [await self._feed.get_options(currency, expired=True) for currency in self._cash]
+        expired_map = {option.name: option for option in sum(expired_lists, [])}
+        open_positions: dict[str, PositionData] = {}
+
+        for instrument in self._positions:
+            data = self._positions[instrument]
+            option = expired_map.get(instrument)
+
+            if option: self._exercise(option, data.size)
+            else: open_positions[instrument] = data
+        self._positions = open_positions
+
+
+    def _exercise(self, option: Option, size: float):
+        currency = get_currency(option.name)
+        delivery_price = self._get_delivery_price(currency, option.expiration)
+
+        can_exercise_call = option.type == 'call' and option.strike < delivery_price
+        can_exercise_put = option.type == 'put' and option.strike > delivery_price
+
+        if can_exercise_call or can_exercise_put:
+            price = abs(option.strike - delivery_price) / delivery_price
+            change = price * size
+        else:
+            price = 0
+            change = 0
+
+        log = TradeLog(
+            timestamp =self._timer.now(),
+            type      ='delivery',
+            instrument=option.name,
+            amount    =abs(size),
+            price     =price,
+            net_change=change,
+        )
+        self._transactions.append(log)
+
+
+    def _get_delivery_price(self, currency: str, expiry: datetime):
+        date_str = expiry.date().isoformat()
+        for item in self._delivery_prices:
+            if item.index_name.startswith(currency) and item.date == date_str:
+                return item.delivery_price
+        raise ValueError
 
 
 OrderMethod = Literal['buy', 'sell', 'close']
