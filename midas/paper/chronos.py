@@ -1,4 +1,6 @@
+from datetime import datetime
 from typing import Callable
+
 from midas.base import Broker, DataFeed, Strategy, Timer
 from .simulated_timer import SimulatedTimer
 
@@ -28,3 +30,7 @@ class Chronos:
         while self._current_time < end:
             await self._timer.run_tasks()
             self._current_time += self._interval
+
+
+    def get_transactions(self, currency: str, start: datetime, end: datetime):
+        return self._broker.get_transactions(currency, start, end)

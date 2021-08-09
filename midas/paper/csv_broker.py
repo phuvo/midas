@@ -122,6 +122,7 @@ class CsvBroker(Broker):
             amount    =abs(size),
             price     =price,
             net_change=net_change,
+            balance   =self._cash[currency],
         )
         self._transactions.append(log)
 
@@ -158,6 +159,7 @@ class CsvBroker(Broker):
         else:
             price = 0
             change = 0
+        self._cash[currency] += change
 
         log = TradeLog(
             timestamp =self._timer.now(),
@@ -166,6 +168,7 @@ class CsvBroker(Broker):
             amount    =abs(size),
             price     =price,
             net_change=change,
+            balance   =self._cash[currency],
         )
         self._transactions.append(log)
 

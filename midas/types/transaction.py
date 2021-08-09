@@ -11,6 +11,7 @@ class TradeLog:
     amount: float
     price: float
     net_change: float
+    balance: float
 
 
 Transaction = TradeLog

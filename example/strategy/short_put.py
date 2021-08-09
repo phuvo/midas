@@ -26,9 +26,6 @@ class ShortPut(Strategy):
         put_options = [option for option in all_options if option.type == 'put']
         ticker = await self.find_sellable_put(put_options)
 
-        assert ticker
-        print(f'Sold {ticker.instrument} at {ticker.bid_price}')
-
         sell_order = Order(ticker.instrument, 1, 'limit', ticker.bid_price)
         await self.broker.sell(sell_order)
 
@@ -40,6 +37,7 @@ class ShortPut(Strategy):
         for option in put_options:
             ticker = await self.feed.get_ticker(option.name)
             if ticker.bid_price > 0: return ticker
+        raise ValueError
 
 
     def run_after_expiration(self, task: Callable[[], Awaitable[None]], option: Option):
